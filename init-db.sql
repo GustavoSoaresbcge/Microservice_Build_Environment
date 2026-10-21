@@ -1,0 +1,2 @@
+CREATE DATABASE "ms-user";
+CREATE DATABASE "ms-email";
