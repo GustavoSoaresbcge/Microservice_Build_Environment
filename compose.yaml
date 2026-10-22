@@ -7,7 +7,7 @@ services:
     volumes:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     # ports:            # Uncomment only if you want access the database via IDE
-    #   - "5432:5432"
+    #   - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -18,8 +18,8 @@ services:
     image: rabbitmq:4-management
     ports:
     # ports:            # Uncomment only if you want external access to the broker
-    # - "5672:5672"
-      - "15672:15672"
+    # - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -29,7 +29,7 @@ services:
   user:
     build: https://github.com/GustavoSoaresbcge/Microservice_User.git#main
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ms-user
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -43,7 +43,7 @@ services:
   email:
     build: https://github.com/GustavoSoaresbcge/Microservice_Email.git#main
     ports:
-      - "8082:8082"
+      - "127.0.0.1:8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ms-email
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

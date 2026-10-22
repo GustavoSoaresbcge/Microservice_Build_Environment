@@ -1,4 +1,4 @@
-# buildEnvironment
+# Build Environment
 
 Ambiente completo para rodar, **com um único comando**, o sistema de dois microsserviços de cadastro e envio de e-mail:
 
@@ -34,8 +34,8 @@ flowchart LR
 **1. Clone este repositório** (apenas este, os serviços são baixados pelo Docker):
 
 ```bash
-git clone https://github.com/GustavoSoaresbcge/buildEnvironment.git
-cd buildEnvironment
+git clone https://github.com/GustavoSoaresbcge/Microservice_Build_Environment.git
+cd Microservice_Build_Environment
 ```
 
 **2. Crie o arquivo `.env`** a partir do exemplo:
@@ -52,6 +52,7 @@ No Windows (PowerShell ou CMD): `copy .env.example .env`
 POSTGRES_PASSWORD=uma_senha_qualquer_para_o_banco
 MAIL_USERNAME=seu_email@gmail.com
 MAIL_PASSWORD=sua_senha_de_app_do_gmail
+RABBITMQ_ADDRESS=seu_endereco_do_rabbitmq
 ```
 
 **4. Suba tudo:**
@@ -90,7 +91,10 @@ Ou use o Postman: `POST http://localhost:8081/users` com o corpo JSON acima.
 
 1. Pare tudo (`Ctrl+C` e `docker compose down`) e coloque uma `MAIL_PASSWORD` **inválida** no `.env`.
 2. Suba de novo (`docker compose up`) e faça um cadastro.
-3. Acompanhe `docker compose logs -f email`: o envio falha e é tentado de novo com espera crescente.
+3. Acompanhe `docker compose logs -f email`: o envio falha e é tentado de novo com espera crescente. Para acompanhar apenas as falhas use:
+```powershell
+docker compose logs -f email | Select-String "Falha ao enviar|Retry Policy Exhausted"
+``` 
 4. Depois das 3 tentativas, a mensagem aparece na fila `email.dlq` (painel do RabbitMQ, aba **Queues**).
 5. Corrija a senha, suba de novo e reprocesse:
 
@@ -98,6 +102,16 @@ Ou use o Postman: `POST http://localhost:8081/users` com o corpo JSON acima.
 curl -X POST http://localhost:8082/admin/dlq/reprocess
 ```
 
+
+**Conferir que os dados foram para os bancos:**
+ 
+```bash
+docker compose exec postgres psql -U postgres -d ms-user -c "SELECT * FROM tb_users;"
+docker compose exec postgres psql -U postgres -d ms-email -c "SELECT * FROM tb_emails;"
+```
+ 
+Cada cadastro cria uma linha em `tb_users` (banco do user) e, depois do processamento, uma linha em `tb_emails` (banco do email) com o resultado do envio.
+ 
 ## Comandos úteis
 
 ```bash
